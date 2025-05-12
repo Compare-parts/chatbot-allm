@@ -1,0 +1,55 @@
+version: '3.8'
+services:
+  anythingllm:
+    container_name: anythingllm
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+      args:
+        ARG_UID: ${UID:-1000}
+        ARG_GID: ${GID:-1000}
+    ports:
+      - "3001:3001"
+    volumes:
+      - "./.env:/app/server/.env"
+      - "I:\\Cloudflare Origin Certificate\\aicompareparts-origin.pem:/app/server/certs/aicompareparts-origin.pem"
+      - "I:\\Cloudflare Origin Certificate\\aicompareparts-private.pem:/app/server/certs/aicompareparts-private.pem"
+      - "I:\\AnythingLLM-Docker\\storage:/app/server/storage"
+    environment:
+      - STORAGE_DIR=/app/server/storage
+      - NODE_ENV=production
+      - ANYTHING_LLM_RUNTIME=docker
+      - QDRANT_URL=http://qdrant:6333
+      - QDRANT_API_KEY=anyth1ngllm
+    healthcheck:
+      test: [ "CMD-SHELL", "/bin/bash /usr/local/bin/docker-healthcheck.sh || exit 1" ]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 1m
+    cap_add:
+      - SYS_ADMIN
+    networks:
+      - anythingllm_network
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.5
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - "C:\\qdrant_data:/qdrant/storage"
+    environment:
+      - QDRANT__SERVICE__API_KEY=anyth1ngllm
+      - TZ=Etc/UTC
+      - RUN_MODE=production
+    networks:
+      - anythingllm_network
+    working_dir: /qdrant
+    restart: unless-stopped
+
+networks:
+  anythingllm_network:
+    driver: bridge
