@@ -347,8 +347,29 @@ const QDrant = {
     });
 
     const sources = sourceDocuments.map((metadata, i) => {
-      return { ...metadata, text: contextTexts[i] };
+      return {
+        text: contextTexts[i],
+        title: metadata.title || "Untitled",
+        url: metadata.url || "No URL provided",
+        product_image: metadata.product_image || "No image available",
+        ...metadata,
+      };
     });
+    // Serialize the contextTexts to include full metadata
+    const serializedContextTexts = sources.map(
+      (source) =>
+        `### Product Title: ${source.title}\n` +
+        `**Product URL:** [View Product](${source.url})\n` +
+        `![Product Image](${source.product_image})\n\n` +
+        `${source.text}\n`
+    );
+
+    //console.log("Final Serialized Context Texts Sent to LLM:", serializedContextTexts);
+
+    //const aftercuration = this.curateSources(sources);
+    //console.log('AFTER CURATING');
+    //console.log(aftercuration);
+
     return {
       contextTexts,
       sources: this.curateSources(sources),
@@ -387,20 +408,19 @@ const QDrant = {
     return { reset: true };
   },
   curateSources: function (sources = []) {
-    const documents = [];
-    for (const source of sources) {
-      if (Object.keys(source).length > 0) {
-        const metadata = source.hasOwnProperty("metadata")
-          ? source.metadata
-          : source;
-        documents.push({
-          ...metadata,
-        });
-      }
+  const documents = [];
+  for (const source of sources) {
+    if (Object.keys(source).length > 0) {
+      const metadata = source.hasOwnProperty("metadata") ? source.metadata : source;
+      documents.push({
+        ...metadata,
+        text: Object.values(metadata).join(" "), // Combine all field values into a single string
+      });
     }
+  }
+  return documents;
+},
 
-    return documents;
-  },
 };
 
 module.exports.QDrant = QDrant;

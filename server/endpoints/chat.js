@@ -69,18 +69,10 @@ function chatEndpoints(app) {
           null,
           attachments
         );
-        await Telemetry.sendTelemetry("sent_chat", {
-          multiUserMode: multiUserMode(response),
-          LLMSelection: process.env.LLM_PROVIDER || "openai",
-          Embedder: process.env.EMBEDDING_ENGINE || "inherit",
-          VectorDbSelection: process.env.VECTOR_DB || "lancedb",
-          multiModal: Array.isArray(attachments) && attachments?.length !== 0,
-          TTSSelection: process.env.TTS_PROVIDER || "native",
-          LLMModel: getModelTag(),
-        });
+      
 
         await EventLogs.logEvent(
-          "sent_chat",
+          "sent_chat3",
           {
             workspaceName: workspace?.name,
             chatModel: workspace?.chatModel || "System Default",
@@ -185,7 +177,7 @@ function chatEndpoints(app) {
         });
 
         await EventLogs.logEvent(
-          "sent_chat",
+          "sent_chat2",
           {
             workspaceName: workspace.name,
             thread: thread.name,

@@ -50,9 +50,10 @@ async function messageArrayCompressor(llm, messages = [], rawHistory = []) {
   // assume the response will be at least 600 tokens. If the total prompt + reply is over we need to proactively
   // run the compressor to ensure the prompt has enough space to reply.
   // realistically - most users will not be impacted by this.
-  const tokenBuffer = 600;
+  const tokenBuffer = 1000;
   const tokenManager = new TokenManager(llm.model);
   // If no work needs to be done, just pass through.
+  return messages;
   if (tokenManager.statsFrom(messages) + tokenBuffer < llm.promptWindowLimit())
     return messages;
 
@@ -194,6 +195,7 @@ async function messageStringCompressor(llm, promptArgs = {}, rawHistory = []) {
   const tokenBuffer = 600;
   const tokenManager = new TokenManager(llm.model);
   const initialPrompt = llm.constructPrompt(promptArgs);
+  return initialPrompt;
   if (
     tokenManager.statsFrom(initialPrompt) + tokenBuffer <
     llm.promptWindowLimit()
